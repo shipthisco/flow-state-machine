@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { ReactFlowProvider } from '@xyflow/react'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { ApiProvider } from './lib/api-context'
@@ -6,8 +6,21 @@ import FlowCanvas from './components/FlowCanvas'
 import Sidebar from './components/Sidebar'
 import NodePalette from './components/NodePalette'
 
-export default function StatesCanvas({ workflow, onChange, apiConfig, roles, actionEvents, fieldMeta }) {
+export default function StatesCanvas({ workflow: externalWorkflow, onChange, apiConfig, roles, actionEvents, fieldMeta }) {
+  const [workflow, setWorkflow] = useState(externalWorkflow)
   const [selectedElement, setSelectedElement] = useState(null)
+  const isExternalUpdate = useRef(false)
+
+  // Sync when the external prop changes (e.g. parent resets/discards)
+  useEffect(() => {
+    isExternalUpdate.current = true
+    setWorkflow(externalWorkflow)
+  }, [externalWorkflow])
+
+  const handleChange = useCallback((updatedWorkflow) => {
+    setWorkflow(updatedWorkflow)
+    onChange?.(updatedWorkflow)
+  }, [onChange])
 
   const handleSelectElement = useCallback((element) => {
     setSelectedElement(element)
@@ -44,7 +57,7 @@ export default function StatesCanvas({ workflow, onChange, apiConfig, roles, act
           <ReactFlowProvider>
             <FlowCanvas
               workflow={workflow}
-              onChange={onChange}
+              onChange={handleChange}
               selectedElement={selectedElement}
               onSelectElement={handleSelectElement}
             />
@@ -52,7 +65,7 @@ export default function StatesCanvas({ workflow, onChange, apiConfig, roles, act
           <Sidebar
             workflow={workflow}
             selectedElement={selectedElement}
-            onChange={onChange}
+            onChange={handleChange}
             onClose={handleCloseSidebar}
             onSelectElement={handleSelectElement}
           />
