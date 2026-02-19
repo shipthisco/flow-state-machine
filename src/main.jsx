@@ -1054,4 +1054,3 @@ createRoot(document.getElementById('root')).render(
   </StrictMode>
 )
 
-export default DevWrapper
