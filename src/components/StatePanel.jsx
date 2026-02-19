@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { Trash2, Plus } from 'lucide-react'
+import { Trash2, Plus, ArrowRight, ChevronRight } from 'lucide-react'
 import { TextField, SelectField, FieldGrid, FeatureToggle, TextAreaField } from './form-fields'
 import { MultiSelectField } from './multi-select-field'
 import FieldCriterion from './FieldCriterion'
@@ -18,7 +18,7 @@ const SHIPTHIS_STATUSES = [
   { value: 'on_hold', label: 'On Hold' },
 ]
 
-export default function StatePanel({ state, onChange, onDelete, isDirectMode, onAddAction }) {
+export default function StatePanel({ state, onChange, onDelete, isDirectMode, onAddAction, onSelectAction }) {
   const { fieldOptions } = useApi()
   const update = (key, value) => onChange({ ...state, [key]: value })
 
@@ -66,6 +66,55 @@ export default function StatePanel({ state, onChange, onDelete, isDirectMode, on
           description="Map this state to an internal system status"
         />
       </FieldGrid>
+
+      {/* Actions */}
+      {!isDirectMode && (
+        <Section
+          title="Actions"
+          description="Transitions available from this state"
+          headerAction={
+            onAddAction && (
+              <Button variant="outline" size="sm" onClick={onAddAction}>
+                <Plus className="h-3.5 w-3.5" />
+                Add Action
+              </Button>
+            )
+          }
+        >
+          {(state.actions || []).length === 0 ? (
+            <p className="text-xs text-muted-foreground py-2">No actions yet. Add one to create transitions from this state.</p>
+          ) : (
+            <div className="space-y-1.5">
+              {(state.actions || []).map((action, idx) => (
+                <button
+                  key={action.action_id || idx}
+                  onClick={() => onSelectAction?.(idx)}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 transition-colors text-left group"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-medium text-foreground truncate">
+                        {action.title || action.action_id || 'Untitled Action'}
+                      </span>
+                      {action.is_primary_action && (
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-blue-600 bg-blue-50 border border-blue-100 rounded px-1.5 py-0.5 shrink-0">Primary</span>
+                      )}
+                    </div>
+                    {action.next_state_id && (
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <ArrowRight className="h-3 w-3 text-muted-foreground shrink-0" />
+                        <span className="text-xs text-muted-foreground truncate">{action.next_state_id}</span>
+                      </div>
+                    )}
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 group-hover:text-foreground transition-colors" />
+                </button>
+              ))}
+            </div>
+          )}
+        </Section>
+      )}
+
 
       {/* Display Settings */}
       <Section title="Display Settings">
@@ -196,14 +245,9 @@ export default function StatePanel({ state, onChange, onDelete, isDirectMode, on
         </Section>
       )}
 
+      
       {/* Footer actions */}
       <div className="flex items-center gap-3 pt-2">
-        {!isDirectMode && onAddAction && (
-          <Button variant="outline" size="sm" onClick={onAddAction}>
-            <Plus className="h-3.5 w-3.5" />
-            Add Action
-          </Button>
-        )}
         <div className="flex-1" />
         <Button variant="destructive" size="sm" onClick={onDelete}>
           <Trash2 className="h-3.5 w-3.5" />

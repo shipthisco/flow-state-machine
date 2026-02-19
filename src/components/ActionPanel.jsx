@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { Trash2 } from 'lucide-react'
+import { Trash2, ArrowRight } from 'lucide-react'
 import { TextField, SelectField, SwitchField, FieldGrid, FeatureToggle, TextAreaField } from './form-fields'
 import { ChipInput } from './chip-input'
 import { MultiSelectField } from './multi-select-field'
@@ -13,7 +13,7 @@ import UpdateFieldEditor from './UpdateFieldEditor'
 import Section from './Section'
 import { useApi } from '@/lib/api-context'
 
-export default function ActionPanel({ action, onChange, onDelete, allStateIds }) {
+export default function ActionPanel({ action, onChange, onDelete, allStateIds, parentState, onSelectState }) {
   const { fieldAccessors, fieldOptions } = useApi()
 
   if (!action) return null
