@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { ReactFlowProvider } from '@xyflow/react'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { ApiProvider } from './lib/api-context'
@@ -7,12 +7,21 @@ import Sidebar from './components/Sidebar'
 import NodePalette from './components/NodePalette'
 
 export default function StatesCanvas({ workflow: externalWorkflow, onChange, apiConfig, roles, actionEvents, fieldMeta }) {
+  const [workflow, setWorkflow] = useState(externalWorkflow)
   const [selectedElement, setSelectedElement] = useState(null)
-  const workflow = externalWorkflow
+  const isExternalUpdate = useRef(false)
+
+  // Sync when the external prop changes (e.g. parent resets/discards)
+  useEffect(() => {
+    isExternalUpdate.current = true
+    setWorkflow(externalWorkflow)
+  }, [externalWorkflow])
 
   const handleChange = useCallback((updatedWorkflow) => {
+    setWorkflow(updatedWorkflow)
     onChange?.(updatedWorkflow)
   }, [onChange])
+
 
   const handleSelectElement = useCallback((element) => {
     setSelectedElement(element)
