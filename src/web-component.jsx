@@ -1,6 +1,7 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import StatesCanvas from './StatesCanvas'
+import { PortalContainerProvider } from './lib/portal-context'
 import './index.css'
 
 function computeJsonDiff(oldText, newText) {
@@ -138,16 +139,18 @@ class WorkflowStatesCanvasElement extends HTMLElement {
   _render() {
     if (!this._root) return
     this._root.render(
-      <StatesCanvas
-        workflow={this._workflow}
-        apiConfig={this._apiConfig}
-        roles={this._roles}
-        actionEvents={this._actionEvents}
-        fieldMeta={this._fieldMeta}
-        onChange={(updatedWorkflow) => {
-          this._currentWorkflow = updatedWorkflow
-        }}
-      />
+      <PortalContainerProvider value={this}>
+        <StatesCanvas
+          workflow={this._workflow}
+          apiConfig={this._apiConfig}
+          roles={this._roles}
+          actionEvents={this._actionEvents}
+          fieldMeta={this._fieldMeta}
+          onChange={(updatedWorkflow) => {
+            this._currentWorkflow = updatedWorkflow
+          }}
+        />
+      </PortalContainerProvider>
     )
   }
 }
